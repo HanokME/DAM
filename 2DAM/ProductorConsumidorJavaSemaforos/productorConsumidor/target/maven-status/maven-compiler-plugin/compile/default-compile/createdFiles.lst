@@ -1,0 +1,5 @@
+com\mycompany\productorconsumidor\Consumidor.class
+com\mycompany\productorconsumidor\Productor.class
+com\mycompany\productorconsumidor\ProductorConsumidor.class
+com\mycompany\productorconsumidor\BufferSemaforo.class
+com\mycompany\productorconsumidor\BufferCerrojo.class
