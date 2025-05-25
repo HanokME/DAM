@@ -4,6 +4,7 @@ import (
 	"github.com/HanokME/DAM/2DAM/dietaApp/controllers"
 	"github.com/HanokME/DAM/2DAM/dietaApp/database"
 	"github.com/HanokME/DAM/2DAM/dietaApp/models"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -23,6 +24,17 @@ func main() {
 
 	println("Migración de la base de datos completada")
 
-	controllers.RegistrarDietista()
+	// Inicializar Gin
+	r := gin.Default()
+
+	// Cargar plantillas
+	r.LoadHTMLGlob("templates/*.html")
+
+	// Rutas
+	r.GET("/registro", controllers.MostrarRegistro)
+	r.POST("/registro", controllers.RegistrarDietista)
+
+	// Iniciar servidor
+	r.Run(":8080")
 
 }

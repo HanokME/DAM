@@ -1,43 +1,47 @@
 package controllers
 
 import (
-	"bufio" //bufio y os para leer desde la consola
-	"os"
-
-	"fmt" //Esto pa mostrar texto
-
+	"net/http"
 	"strings" //Para evitar saltos de linea y espacios
 
 	"github.com/HanokME/DAM/2DAM/dietaApp/database"
 	"github.com/HanokME/DAM/2DAM/dietaApp/models"
+	"github.com/gin-gonic/gin"
 )
 
-func RegistrarDietista() {
-	reader := bufio.NewReader(os.Stdin)
+// Mostrar formulario de registro
+func MostrarRegistro(c *gin.Context) {
+	c.HTML(http.StatusOK, "registro.html", gin.H{
+		"mensaje": "",
+	})
+}
 
-	fmt.Println("=== Registro de nuevo dietista ===")
-
-	fmt.Println("DNI: ")
-	dni, _ := reader.ReadString('\n')
-
-	fmt.Println("Nombre: ")
-	nombre, _ := reader.ReadString('\n')
-
-	fmt.Println("Contraseña: ")
-	contraseña, _ := reader.ReadString('\n')
+func RegistrarDietista(c *gin.Context) {
+	dni := strings.TrimSpace(c.PostForm("dni"))
+	nombre := strings.TrimSpace(c.PostForm("nombre"))
+	pass := strings.TrimSpace(c.PostForm("contraseña"))
 
 	dietista := models.Dietista{
-		DNI:        strings.TrimSpace(dni),
-		Nombre:     strings.TrimSpace(nombre),
-		Contraseña: strings.TrimSpace(contraseña),
+		DNI:        dni,
+		Nombre:     nombre,
+		Contraseña: pass,
 	}
 
+	err := GuardarDietista(dietista)
+	if err != nil {
+		c.HTML(http.StatusOK, "registro.html", gin.H{
+			"mensaje": "Error al registrar: " + err.Error(),
+		})
+		return
+	}
+
+	c.HTML(http.StatusOK, "registro.html", gin.H{
+		"mensaje": "Dietista registrado con éxito.",
+	})
+
+}
+
+func GuardarDietista(dietista models.Dietista) error {
 	result := database.DB.Create(&dietista)
-
-	if result.Error != nil {
-		fmt.Println("Error al registrar el dietista:", result.Error)
-	} else {
-		fmt.Println("Dietista registrado con éxito (ID:", dietista.ID, ")")
-	}
-
+	return result.Error
 }

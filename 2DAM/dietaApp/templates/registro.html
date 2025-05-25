@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Dietista</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f3f3f3;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #444;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .mensaje {
+            text-align: center;
+            margin-bottom: 15px;
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #2196F3;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Registrar un Dietista</h2>
+    {{if .mensaje}}
+        <div class="mensaje">{{.mensaje}}</div>
+    {{end}}
+    <form method="POST" action="/registro">
+        <label for="dni">DNI:</label>
+        <input type="text" name="dni" required>
+
+        <label for="nombre">Nombre:</label>
+        <input type="text" name="nombre" required>
+
+        <label for="contraseña">Contraseña:</label>
+        <input type="password" name="contraseña" required>
+
+        <button type="submit">Registrar</button>
+    </form>
+</div>
+</body>
+</html>
