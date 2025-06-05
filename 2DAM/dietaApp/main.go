@@ -37,6 +37,8 @@ func main() {
 	r.GET("/login", controllers.MostrarLogin)
 	r.POST("/login", controllers.IniciarSesion)
 
+	r.GET("/panel", controllers.MostrarPanel)
+
 	// Iniciar servidor
 	r.Run(":8080")
 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel del Dietista - DietaApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #e0e0e0;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .perfil {
+            display: flex;
+            align-items: center;
+        }
+
+        .inicial {
+            background-color: #444;
+            color: white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .btn-cerrar {
+            background-color: #333;
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        main {
+            padding: 30px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .card {
+            width: 160px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            background-color: #ccc;
+        }
+
+        .card .nombre {
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .btn-anadir {
+            margin-bottom: 20px;
+            background-color: #444;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">DietaApp</div>
+    <div class="perfil">
+        <div class="inicial">F</div> 
+        <a href="/logout" class="btn-cerrar">Cerrar Sesión</a>
+    </div>
+</header>
+
+<main>
+    <h2>Fichas Clínicas</h2>
+
+    <button class="btn-anadir" onclick="location.href='/nueva-ficha'">Añadir</button>
+
+    {{if .error}}
+    <div class="error">{{.error}}</div>
+    {{end}}
+
+    <div class="grid">
+        {{range .fichas}}
+        <div class="card">
+            <img src="/static/user-placeholder.png" alt="Paciente">
+            <div class="nombre">{{.Nombre}}</div>
+        </div>
+        {{else}}
+        <p>No hay fichas registradas.</p>
+        {{end}}
+    </div>
+</main>
+
+</body>
+</html>
