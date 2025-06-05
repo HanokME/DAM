@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registro de Dietista</title>
+    <title>Iniciar Sesión</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,13 +29,10 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        .mensaje {
-            text-align: center;
-            margin-bottom: 15px;
-            color: green;
-        }
         .error {
+            text-align: center;
             color: red;
+            margin-bottom: 15px;
         }
         button {
             width: 100%;
@@ -62,24 +59,21 @@
 </head>
 <body>
 <div class="container">
-    <h2>Registrar un Dietista</h2>
-    {{if .mensaje}}
-        <div class="mensaje">{{.mensaje}}</div>
+    <h2>Iniciar Sesión</h2>
+    {{if .error}}
+        <div class="error">{{.error}}</div>
     {{end}}
-    <form method="POST" action="/registro">
+    <form method="POST" action="/login">
         <label for="dni">DNI:</label>
         <input type="text" name="dni" required>
-
-        <label for="nombre">Nombre:</label>
-        <input type="text" name="nombre" required>
 
         <label for="contraseña">Contraseña:</label>
         <input type="password" name="contraseña" required>
 
-        <button type="submit">Registrar</button>
+        <button type="submit">Entrar</button>
     </form>
     <div class="link">
-        ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+        ¿No tienes cuenta? <a href="/registro">Regístrate</a>
     </div>
 </div>
 </body>

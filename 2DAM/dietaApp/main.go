@@ -34,6 +34,9 @@ func main() {
 	r.GET("/registro", controllers.MostrarRegistro)
 	r.POST("/registro", controllers.RegistrarDietista)
 
+	r.GET("/login", controllers.MostrarLogin)
+	r.POST("/login", controllers.IniciarSesion)
+
 	// Iniciar servidor
 	r.Run(":8080")
 
