@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/HanokME/DAM/2DAM/dietaApp/database"
 	"github.com/HanokME/DAM/2DAM/dietaApp/models"
@@ -9,19 +11,30 @@ import (
 )
 
 func MostrarPanel(c *gin.Context) {
-	// (futuro)usar ID del dietista logueado, para mostrar solo sus fichas.
-	var fichas []models.FichaPaciente
-
-	err := database.DB.Find(&fichas).Error
+	// Obtener el ID del dietista desde la cookie
+	idStr, err := c.Cookie("dietista_id")
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, "panel.html", gin.H{
-			"error":  "No se pudieron cargar las fichas clínicas.",
-			"fichas": nil,
-		})
+		c.Redirect(http.StatusFound, "/login")
 		return
 	}
 
+	dietistaID, _ := strconv.Atoi(idStr)
+
+	// Obtener el dietista
+	var dietista models.Dietista
+	if err := database.DB.First(&dietista, dietistaID).Error; err != nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	// Obtener fichas asociadas (por ahora, todas)
+	var fichas []models.FichaPaciente
+	database.DB.Find(&fichas)
+
+	inicial := strings.ToUpper(string(dietista.Nombre[0]))
+
 	c.HTML(http.StatusOK, "panel.html", gin.H{
-		"fichas": fichas,
+		"fichas":  fichas,
+		"inicial": inicial,
 	})
 }

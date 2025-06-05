@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +26,16 @@ func IniciarSesion(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "login.html", gin.H{
-		"error": "Inicio de sesión exitoso. ¡Bienvenido " + dietista.Nombre + "!",
-	})
+	// Guardar ID del dietista en cookie
+	c.SetCookie("dietista_id", strconv.Itoa(int(dietista.ID)), 3600, "/", "localhost", false, true)
+
+	c.Redirect(http.StatusFound, "/panel")
+}
+
+func CerrarSesion(c *gin.Context) {
+	// Eliminar la cookie dietista_id
+	c.SetCookie("dietista_id", "", -1, "/", "localhost", false, true)
+
+	// Redirigir al login
+	c.Redirect(http.StatusFound, "/login")
 }

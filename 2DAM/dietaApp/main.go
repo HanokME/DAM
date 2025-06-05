@@ -37,6 +37,8 @@ func main() {
 	r.GET("/login", controllers.MostrarLogin)
 	r.POST("/login", controllers.IniciarSesion)
 
+	r.GET("/logout", controllers.CerrarSesion)
+
 	r.GET("/panel", controllers.MostrarPanel)
 
 	// Iniciar servidor
