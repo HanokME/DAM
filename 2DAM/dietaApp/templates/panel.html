@@ -53,8 +53,24 @@
             padding: 30px;
         }
 
-        h2 {
+        .titulo-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+        }
+
+        h2 {
+            margin: 0;
+        }
+
+        .btn-anadir {
+            background-color: #444;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
         .grid {
@@ -70,13 +86,15 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             overflow: hidden;
             text-align: center;
+            padding-bottom: 10px;
         }
 
         .card img.user {
-            width: 100%;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             object-fit: cover;
-            background-color: #ccc;
+            margin-top: 16px;
+            border-radius: 50%;
         }
 
         .card .nombre {
@@ -102,17 +120,6 @@
             transform: scale(1.15);
         }
 
-        .btn-anadir {
-            margin-bottom: 20px;
-            background-color: #444;
-            color: white;
-            padding: 8px 14px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            float: right;
-        }
-
         .error {
             color: red;
             margin-bottom: 10px;
@@ -122,17 +129,21 @@
 <body>
 
 <header>
-    <div class="logo">DietaApp</div>
+    <div class="logo" style="display: flex; align-items: center;">
+        <img src="/static/logo.png" alt="Logo" style="height: 48px; object-fit: contain; margin-right: 8px;">
+    </div>
     <div class="perfil">
         <div class="inicial">{{.inicial}}</div>
         <a href="/logout" class="btn-cerrar">Cerrar Sesión</a>
     </div>
 </header>
+    
 
 <main>
-    <h2>Fichas Clínicas</h2>
-
-    <button class="btn-anadir" onclick="location.href='/nueva_ficha'">Añadir</button>
+    <div class="titulo-panel">
+        <h2>Fichas Clínicas</h2>
+        <button class="btn-anadir" onclick="location.href='/nueva_ficha'">Añadir</button>
+    </div>
 
     {{if .error}}
     <div class="error">{{.error}}</div>
@@ -141,7 +152,11 @@
     <div class="grid">
         {{range .fichas}}
         <div class="card">
-            <img src="/static/user-placeholder.png" alt="Paciente" class="user">
+            <img
+                src="https://ui-avatars.com/api/?name={{.Nombre | urlquery}}&background=4CAF50&color=fff&bold=true"
+                alt="Paciente"
+                class="user"
+            >
             <div class="nombre">{{.Nombre}}</div>
             <div class="acciones">
                 <a href="/editar_ficha/{{.ID}}" title="Editar Ficha">
