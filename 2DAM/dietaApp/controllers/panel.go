@@ -27,9 +27,12 @@ func MostrarPanel(c *gin.Context) {
 		return
 	}
 
-	// Obtener fichas asociadas (por ahora, todas)
+	// Obtener fichas asociadas a ese dietista
 	var fichas []models.FichaPaciente
-	database.DB.Find(&fichas)
+	database.DB.
+		Joins("JOIN crea ON crea.id_ficha = ficha_pacientes.id").
+		Where("crea.id_dietista = ?", dietistaID).
+		Find(&fichas)
 
 	inicial := strings.ToUpper(string(dietista.Nombre[0]))
 

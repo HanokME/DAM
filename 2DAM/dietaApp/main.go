@@ -41,6 +41,9 @@ func main() {
 
 	r.GET("/panel", controllers.MostrarPanel)
 
+	r.GET("/nueva_ficha", controllers.MostrarFormularioFicha)
+	r.POST("/nueva_ficha", controllers.RegistrarFichaPaciente)
+
 	// Iniciar servidor
 	r.Run(":8080")
 
