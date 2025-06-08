@@ -110,3 +110,57 @@ func parseFloat(s string) float64 {
 	f, _ := strconv.ParseFloat(s, 64)
 	return f
 }
+
+// MostrarFormularioEdicion muestra el formulario con los datos del paciente cargados
+func MostrarFormularioEdicion(c *gin.Context) {
+	// Obtener el ID de la ficha desde la URL
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.Redirect(http.StatusFound, "/panel")
+		return
+	}
+
+	var ficha models.FichaPaciente
+	if err := database.DB.First(&ficha, id).Error; err != nil {
+		c.Redirect(http.StatusFound, "/panel")
+		return
+	}
+
+	c.HTML(http.StatusOK, "editar_ficha.html", gin.H{
+		"ficha": ficha,
+	})
+}
+
+// ActualizarFichaPaciente guarda los cambios realizados a la ficha
+func ActualizarFichaPaciente(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.Redirect(http.StatusFound, "/panel")
+		return
+	}
+
+	var ficha models.FichaPaciente
+	if err := database.DB.First(&ficha, id).Error; err != nil {
+		c.Redirect(http.StatusFound, "/panel")
+		return
+	}
+
+	// Actualizar campos
+	ficha.DNI = c.PostForm("dni")
+	ficha.Nombre = c.PostForm("nombre")
+	ficha.Email = c.PostForm("email")
+	ficha.Telefono = c.PostForm("telefono")
+	ficha.FechaNacimiento, _ = time.Parse("2006-01-02", c.PostForm("fecha_nacimiento"))
+	ficha.AlturaCM = parseInt(c.PostForm("altura"))
+	ficha.PesoKG = parseFloat(c.PostForm("peso"))
+	ficha.IMC = parseFloat(c.PostForm("imc"))
+	ficha.Actividad = c.PostForm("actividad")
+	ficha.Objetivo = c.PostForm("objetivo")
+	ficha.Patologia = c.PostForm("patologia")
+
+	database.DB.Save(&ficha)
+
+	c.Redirect(http.StatusFound, "/panel")
+}

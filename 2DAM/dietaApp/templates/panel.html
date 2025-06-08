@@ -64,7 +64,7 @@
         }
 
         .card {
-            width: 160px;
+            width: 180px;
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -72,7 +72,7 @@
             text-align: center;
         }
 
-        .card img {
+        .card img.user {
             width: 100%;
             height: 120px;
             object-fit: cover;
@@ -82,6 +82,24 @@
         .card .nombre {
             padding: 10px;
             font-weight: bold;
+        }
+
+        .acciones {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding-bottom: 12px;
+        }
+
+        .acciones a img.icono {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .acciones a img.icono:hover {
+            transform: scale(1.15);
         }
 
         .btn-anadir {
@@ -123,8 +141,16 @@
     <div class="grid">
         {{range .fichas}}
         <div class="card">
-            <img src="/static/user-placeholder.png" alt="Paciente">
+            <img src="/static/user-placeholder.png" alt="Paciente" class="user">
             <div class="nombre">{{.Nombre}}</div>
+            <div class="acciones">
+                <a href="/editar_ficha/{{.ID}}" title="Editar Ficha">
+                    <img src="/static/edit-icon.png" alt="Editar" class="icono">
+                </a>
+                <a href="/dieta/{{.ID}}" title="Ver/Editar Dieta">
+                    <img src="/static/diet-icon.png" alt="Dieta" class="icono">
+                </a>
+            </div>
         </div>
         {{else}}
         <p>No hay fichas registradas.</p>

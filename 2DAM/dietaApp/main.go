@@ -29,6 +29,9 @@ func main() {
 	// Inicializar router de Gin con middleware por defecto (logger y recovery)
 	r := gin.Default()
 
+	// Servir archivos estáticos desde la carpeta ./static
+	r.Static("/static", "./static")
+
 	// Cargar todas las plantillas HTML desde la carpeta /templates
 	r.LoadHTMLGlob("templates/*.html")
 
@@ -49,6 +52,10 @@ func main() {
 	// Formularios para crear fichas de pacientes
 	r.GET("/nueva_ficha", controllers.MostrarFormularioFicha)
 	r.POST("/nueva_ficha", controllers.RegistrarFichaPaciente)
+
+	// Formularior para editar fichas de pacientes
+	r.GET("/editar_ficha/:id", controllers.MostrarFormularioEdicion)
+	r.POST("/editar_ficha/:id", controllers.ActualizarFichaPaciente)
 
 	// Iniciar el servidor en el puerto 8080
 	r.Run(":8080")
