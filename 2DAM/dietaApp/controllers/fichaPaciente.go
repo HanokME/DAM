@@ -23,7 +23,7 @@ func MostrarFormularioFicha(c *gin.Context) {
 }
 
 func RegistrarFichaPaciente(c *gin.Context) {
-	// Obtener ID del dietista desde cookie
+	// Obtener ID del dietista desde la cookie
 	dietistaIDStr, err := c.Cookie("dietista_id")
 	if err != nil {
 		c.Redirect(http.StatusFound, "/login")
@@ -40,7 +40,7 @@ func RegistrarFichaPaciente(c *gin.Context) {
 		return
 	}
 
-	// Crear ficha
+	// Crear ficha del paciente
 	ficha := models.FichaPaciente{
 		DNI:             strings.TrimSpace(c.PostForm("dni")),
 		Nombre:          strings.TrimSpace(c.PostForm("nombre")),
@@ -55,7 +55,7 @@ func RegistrarFichaPaciente(c *gin.Context) {
 		Patologia:       strings.TrimSpace(c.PostForm("patologia")),
 	}
 
-	// Guardar ficha
+	// Guardar ficha en la base de datos
 	if err := database.DB.Create(&ficha).Error; err != nil {
 		c.HTML(http.StatusOK, "nueva_ficha.html", gin.H{
 			"mensaje": "Error al guardar la ficha: " + err.Error(),
@@ -63,13 +63,27 @@ func RegistrarFichaPaciente(c *gin.Context) {
 		return
 	}
 
-	// Asociar en la tabla Crea
+	// Comprobar si ficha.ID fue asignado correctamente
+	if ficha.ID == 0 {
+		c.HTML(http.StatusOK, "nueva_ficha.html", gin.H{
+			"mensaje": "Error interno: ID de ficha no asignado.",
+		})
+		return
+	}
+
+	// Asociar ficha con dietista
 	crea := models.Crea{
 		IdDietista: uint(dietistaID),
 		IdFicha:    ficha.ID,
 	}
-	database.DB.Create(&crea)
+	if err := database.DB.Create(&crea).Error; err != nil {
+		c.HTML(http.StatusOK, "nueva_ficha.html", gin.H{
+			"mensaje": "Error al asociar la ficha con el dietista: " + err.Error(),
+		})
+		return
+	}
 
+	// Redirigir al panel
 	c.Redirect(http.StatusFound, "/panel")
 }
 

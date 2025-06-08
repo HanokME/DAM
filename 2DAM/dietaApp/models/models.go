@@ -42,6 +42,11 @@ type Crea struct {
 	IdFicha    uint `gorm:"primaryKey"`
 }
 
+// Fijar el nombre de la tabla
+func (Crea) TableName() string {
+	return "crea"
+}
+
 // Relación TIENE entre FichaPaciente y Dieta
 type Tiene struct {
 	IdFicha uint `gorm:"primaryKey"`
