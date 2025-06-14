@@ -71,6 +71,10 @@ type Alimento struct {
 	Grasas   float64
 }
 
+func (Alimento) TableName() string {
+	return "Alimento" //Esto hace que GORM use FROM Alimento en la consulta y no alimentos
+}
+
 // Contiene: relación N:M entre MomentoDia y Alimento con atributo cantidad
 type Contiene struct {
 	IdMomento  uint    `gorm:"primaryKey"`

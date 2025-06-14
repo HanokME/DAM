@@ -152,8 +152,8 @@
             <h3>Momento: {{.Momento}}</h3>
 
             {{ $momentID := .ID }}
-            {{ $cantidades := index $.cantidades $momentID }}
             {{ $alimentos := index $.alimentosPorMomento $momentID }}
+            {{ $cantidades := index $.cantidades $momentID }}
 
             {{if $alimentos}}
                 {{range $i, $a := $alimentos}}

@@ -38,7 +38,6 @@ func MostrarDieta(c *gin.Context) {
 	alimentosPorMomento := make(map[uint][]models.Alimento)
 	cantidades := make(map[uint][]float64)
 
-	// Obtener o crear la dieta una sola vez
 	var dieta models.Dieta
 	result := database.DB.
 		Where("nombre = ? AND observaciones = ?", dia, fichaIDStr).
@@ -54,11 +53,16 @@ func MostrarDieta(c *gin.Context) {
 		return
 	}
 
+	// Debug:
+	fmt.Println("Dieta ID:", dieta.ID, "Día:", dia, "Paciente:", fichaIDStr)
+
 	for _, momento := range momentos {
 		var incluye []models.Incluye
 		database.DB.
 			Where("id_dieta = ? AND id_momento = ?", dieta.ID, momento.ID).
 			Find(&incluye)
+
+		fmt.Printf("➡️ Momento %s (%d): %d alimentos\n", momento.Momento, momento.ID, len(incluye))
 
 		for _, inc := range incluye {
 			var alimento models.Alimento
@@ -110,7 +114,7 @@ func ProcesarAgregarAlimento(c *gin.Context) {
 		Where("dia = ? AND momento = ?", dia, momento).
 		FirstOrCreate(&momentoDia)
 
-	// Buscar o crear dieta (observaciones sigue como string)
+	// Buscar o crear dieta
 	var dieta models.Dieta
 	database.DB.
 		Where("nombre = ? AND observaciones = ?", dia, fichaID).
@@ -118,7 +122,7 @@ func ProcesarAgregarAlimento(c *gin.Context) {
 			Nombre:        dia,
 			Observaciones: fichaID,
 			FechaInicio:   time.Now(),
-			FechaFin:      time.Now(),
+			FechaFin:      time.Now().AddDate(0, 0, 7),
 		})
 
 	// Insertar en Incluye
@@ -128,7 +132,13 @@ func ProcesarAgregarAlimento(c *gin.Context) {
 		IdAlimento: uint(alimentoID),
 		Cantidad:   cantidad,
 	}
-	database.DB.Create(&incluye)
+	result := database.DB.Create(&incluye)
+
+	if result.Error != nil {
+		fmt.Println("Error al insertar alimento:", result.Error)
+	} else {
+		fmt.Printf("Alimento añadido: id %d cantidad %.2f\n", alimentoID, cantidad)
+	}
 
 	c.Redirect(http.StatusFound, "/dieta/"+fichaID)
 }
