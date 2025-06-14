@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/HanokME/DAM/2DAM/dietaApp/database"
 	"github.com/HanokME/DAM/2DAM/dietaApp/models"
@@ -10,51 +11,97 @@ import (
 )
 
 func MostrarDieta(c *gin.Context) {
-	// Obtener fichaID desde la URL
 	fichaIDStr := c.Param("fichaID")
-	fichaID, err := strconv.Atoi(fichaIDStr)
-	if err != nil {
-		c.String(http.StatusBadRequest, "ID inválido")
-		return
+	fichaID, _ := strconv.Atoi(fichaIDStr)
+	dia := c.Query("dia")
+	if dia == "" {
+		dia = "Lunes"
 	}
 
-	// Obtener datos del paciente
 	var ficha models.FichaPaciente
-	if err := database.DB.First(&ficha, fichaID).Error; err != nil {
-		c.String(http.StatusNotFound, "Paciente no encontrado")
-		return
-	}
+	database.DB.First(&ficha, fichaID)
 
-	// Obtener momentos del día asociados a esa ficha (por día)
 	var momentos []models.MomentoDia
-	database.DB.Find(&momentos)
+	database.DB.Where("dia = ?", dia).Find(&momentos)
 
-	// Obtener alimentos por momento
-	type AlimentoConCantidad struct {
-		models.Alimento
-		Cantidad float64
+	alimentosPorMomento := make(map[uint][]models.Alimento)
+	cantidades := make(map[uint][]float64)
+
+	var dieta models.Dieta
+	database.DB.Where("nombre = ? AND observaciones = ?", dia, fichaIDStr).First(&dieta)
+
+	for _, momento := range momentos {
+		var incluye []models.Incluye
+		database.DB.Where("id_dieta = ? AND id_momento = ?", dieta.ID, momento.ID).Find(&incluye)
+
+		for _, inc := range incluye {
+			var alimento models.Alimento
+			database.DB.First(&alimento, inc.IdAlimento)
+			alimentosPorMomento[momento.ID] = append(alimentosPorMomento[momento.ID], alimento)
+			cantidades[momento.ID] = append(cantidades[momento.ID], inc.Cantidad)
+		}
 	}
 
-	// Mapa de alimentos por momento
-	alimentosPorMomento := make(map[uint][]AlimentoConCantidad)
-
-	var incluye []models.Incluye
-	database.DB.Where("id_dieta IN (SELECT id FROM dietas WHERE id IN (SELECT id_dieta FROM tiene WHERE id_ficha = ?))", fichaID).Find(&incluye)
-
-	for _, i := range incluye {
-		var alimento models.Alimento
-		database.DB.First(&alimento, i.IdAlimento)
-
-		alimentosPorMomento[i.IdMomento] = append(alimentosPorMomento[i.IdMomento], AlimentoConCantidad{
-			Alimento: alimento,
-			Cantidad: i.Cantidad,
-		})
-	}
-
-	// Renderizar plantilla
 	c.HTML(http.StatusOK, "dieta.html", gin.H{
 		"paciente":            ficha,
+		"dia":                 dia,
 		"momentos":            momentos,
 		"alimentosPorMomento": alimentosPorMomento,
+		"cantidades":          cantidades,
 	})
+}
+
+// GET: Muestra el formulario para añadir alimento
+func MostrarFormularioAgregarAlimento(c *gin.Context) {
+	fichaID := c.Param("fichaID")
+	dia := c.Param("dia")
+	momento := c.Param("momento")
+
+	var alimentos []models.Alimento
+	database.DB.Order("tipo, nombre").Find(&alimentos)
+
+	c.HTML(http.StatusOK, "agregar_alimento.html", gin.H{
+		"fichaID":   fichaID,
+		"dia":       dia,
+		"momento":   momento,
+		"alimentos": alimentos,
+	})
+}
+
+// POST: Procesa el alimento seleccionado y lo añade a la dieta
+func ProcesarAgregarAlimento(c *gin.Context) {
+	fichaID := c.Param("fichaID")
+	dia := c.Param("dia")
+	momento := c.Param("momento")
+
+	alimentoID, _ := strconv.Atoi(c.PostForm("alimento_id"))
+	cantidad, _ := strconv.ParseFloat(c.PostForm("cantidad"), 64)
+
+	// Buscar o crear momento del día
+	var momentoDia models.MomentoDia
+	database.DB.
+		Where("dia = ? AND momento = ?", dia, momento).
+		FirstOrCreate(&momentoDia)
+
+	// Buscar o crear dieta (usamos observaciones como identificador temporal)
+	var dieta models.Dieta
+	database.DB.
+		Where("nombre = ? AND observaciones = ?", dia, fichaID).
+		FirstOrCreate(&dieta, models.Dieta{
+			Nombre:        dia,
+			Observaciones: fichaID,
+			FechaInicio:   time.Now(),
+			FechaFin:      time.Now(),
+		})
+
+	// Insertar en Incluye
+	incluye := models.Incluye{
+		IdDieta:    dieta.ID,
+		IdMomento:  momentoDia.ID,
+		IdAlimento: uint(alimentoID),
+		Cantidad:   cantidad,
+	}
+	database.DB.Create(&incluye)
+
+	c.Redirect(http.StatusFound, "/dieta/"+fichaID)
 }
