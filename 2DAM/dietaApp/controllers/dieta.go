@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -84,6 +85,7 @@ func MostrarFormularioAgregarAlimento(c *gin.Context) {
 
 	var alimentos []models.Alimento
 	database.DB.Order("tipo, nombre").Find(&alimentos)
+	fmt.Println("Alimentos encontrados:", len(alimentos))
 
 	c.HTML(http.StatusOK, "agregar_alimentos.html", gin.H{
 		"fichaID":   fichaID,
