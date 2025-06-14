@@ -13,16 +13,26 @@ import (
 func MostrarDieta(c *gin.Context) {
 	fichaIDStr := c.Param("fichaID")
 	fichaID, _ := strconv.Atoi(fichaIDStr)
-	dia := c.Query("dia")
-	if dia == "" {
-		dia = "Lunes"
-	}
+	dia := c.DefaultQuery("dia", "Lunes")
 
 	var ficha models.FichaPaciente
 	database.DB.First(&ficha, fichaID)
 
 	var momentos []models.MomentoDia
 	database.DB.Where("dia = ?", dia).Find(&momentos)
+
+	// Si no existen momentos para ese día, los creamos
+	if len(momentos) == 0 {
+		defecto := []string{"Desayuno", "Almuerzo", "Comida", "Merienda", "Cena"}
+		for _, m := range defecto {
+			nuevo := models.MomentoDia{
+				Dia:     dia,
+				Momento: m,
+			}
+			database.DB.Create(&nuevo)
+			momentos = append(momentos, nuevo)
+		}
+	}
 
 	alimentosPorMomento := make(map[uint][]models.Alimento)
 	cantidades := make(map[uint][]float64)
@@ -32,7 +42,14 @@ func MostrarDieta(c *gin.Context) {
 
 	for _, momento := range momentos {
 		var incluye []models.Incluye
-		database.DB.Where("id_dieta = ? AND id_momento = ?", dieta.ID, momento.ID).Find(&incluye)
+		database.DB.
+			Where("nombre = ? AND observaciones = ?", dia, fichaIDStr).
+			FirstOrCreate(&dieta, models.Dieta{
+				Nombre:        dia,
+				Observaciones: fichaIDStr,
+				FechaInicio:   time.Now(),
+				FechaFin:      time.Now().AddDate(0, 0, 7),
+			})
 
 		for _, inc := range incluye {
 			var alimento models.Alimento

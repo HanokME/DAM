@@ -115,31 +115,64 @@
     </div>
 
     <div class="dias">
-        {{range $d := slice "Lunes" "Martes" "Miércoles" "Jueves" "Viernes" "Sábado" "Domingo"}}
-            <form style="display: inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
-                <input type="hidden" name="dia" value="{{$d}}">
-                <button type="submit" class="{{if eq $.dia $d}}active{{end}}">{{$d}}</button>
-            </form>
-        {{end}}
-    </div>
-
-    {{range .momentos}}
-    <div class="momento">
-        <h3>Momento: {{.Momento}}</h3>
-        {{range $i, $a := index $.alimentosPorMomento .ID}}
-            <div class="alimento">
-                <span>{{$a.Nombre}} - {{index $.cantidades .ID | index $i}} g/ml</span>
-                <div class="acciones">
-                    <button>✏️</button>
-                    <button>🗑️</button>
-                </div>
-            </div>
-        {{end}}
-        <form method="GET" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{.Momento}}/add">
-            <button class="anadir" type="submit">+ Añadir alimento</button>
+        
+        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+            <input type="hidden" name="dia" value="Lunes">
+            <button type="submit" class="{{if eq $.dia "Lunes"}}active{{end}}">Lunes</button>
+        </form>
+        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+            <input type="hidden" name="dia" value="Martes">
+            <button type="submit" class="{{if eq $.dia "Martes"}}active{{end}}">Martes</button>
+        </form>
+        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+            <input type="hidden" name="dia" value="Miércoles">
+            <button type="submit" class="{{if eq $.dia "Miércoles"}}active{{end}}">Miércoles</button>
+        </form>
+        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+            <input type="hidden" name="dia" value="Jueves">
+            <button type="submit" class="{{if eq $.dia "Jueves"}}active{{end}}">Jueves</button>
+        </form>
+        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+            <input type="hidden" name="dia" value="Viernes">
+            <button type="submit" class="{{if eq $.dia "Viernes"}}active{{end}}">Viernes</button>
+        </form>
+        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+            <input type="hidden" name="dia" value="Sábado">
+            <button type="submit" class="{{if eq $.dia "Sábado"}}active{{end}}">Sábado</button>
+        </form>
+        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+            <input type="hidden" name="dia" value="Domingo">
+            <button type="submit" class="{{if eq $.dia "Domingo"}}active{{end}}">Domingo</button>
         </form>
     </div>
+    
+
+    {{range .momentos}}
+        <div class="momento">
+            <h3>Momento: {{.Momento}}</h3>
+
+            {{ $momentID := .ID }}
+            {{ $cantidades := index $.cantidades $momentID }}
+            {{ $alimentos := index $.alimentosPorMomento $momentID }}
+
+            {{if $alimentos}}
+                {{range $i, $a := $alimentos}}
+                    <div class="alimento">
+                    <span>{{$a.Nombre}} - {{index $cantidades $i}} g/ml</span>
+                    <div class="acciones">
+                        <button>✏️</button>
+                        <button>🗑️</button>
+                    </div>
+                    </div>
+                {{end}}
+            {{end}}
+
+            <form method="GET" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{.Momento}}/add">
+                <button class="anadir" type="submit">+ Añadir alimento</button>
+            </form>
+        </div>
     {{end}}
+
 
     <button class="anadir">+ Añadir momento del día</button>
 
