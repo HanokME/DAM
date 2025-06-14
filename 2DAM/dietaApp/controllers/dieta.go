@@ -37,19 +37,27 @@ func MostrarDieta(c *gin.Context) {
 	alimentosPorMomento := make(map[uint][]models.Alimento)
 	cantidades := make(map[uint][]float64)
 
+	// Obtener o crear la dieta una sola vez
 	var dieta models.Dieta
-	database.DB.Where("nombre = ? AND observaciones = ?", dia, fichaIDStr).First(&dieta)
+	result := database.DB.
+		Where("nombre = ? AND observaciones = ?", dia, fichaIDStr).
+		FirstOrCreate(&dieta, models.Dieta{
+			Nombre:        dia,
+			Observaciones: fichaIDStr,
+			FechaInicio:   time.Now(),
+			FechaFin:      time.Now().AddDate(0, 0, 7),
+		})
+
+	if result.Error != nil {
+		c.String(http.StatusInternalServerError, "Error al obtener o crear la dieta: "+result.Error.Error())
+		return
+	}
 
 	for _, momento := range momentos {
 		var incluye []models.Incluye
 		database.DB.
-			Where("nombre = ? AND observaciones = ?", dia, fichaIDStr).
-			FirstOrCreate(&dieta, models.Dieta{
-				Nombre:        dia,
-				Observaciones: fichaIDStr,
-				FechaInicio:   time.Now(),
-				FechaFin:      time.Now().AddDate(0, 0, 7),
-			})
+			Where("id_dieta = ? AND id_momento = ?", dieta.ID, momento.ID).
+			Find(&incluye)
 
 		for _, inc := range incluye {
 			var alimento models.Alimento
@@ -77,7 +85,7 @@ func MostrarFormularioAgregarAlimento(c *gin.Context) {
 	var alimentos []models.Alimento
 	database.DB.Order("tipo, nombre").Find(&alimentos)
 
-	c.HTML(http.StatusOK, "agregar_alimento.html", gin.H{
+	c.HTML(http.StatusOK, "agregar_alimentos.html", gin.H{
 		"fichaID":   fichaID,
 		"dia":       dia,
 		"momento":   momento,
@@ -100,7 +108,7 @@ func ProcesarAgregarAlimento(c *gin.Context) {
 		Where("dia = ? AND momento = ?", dia, momento).
 		FirstOrCreate(&momentoDia)
 
-	// Buscar o crear dieta (usamos observaciones como identificador temporal)
+	// Buscar o crear dieta (observaciones sigue como string)
 	var dieta models.Dieta
 	database.DB.
 		Where("nombre = ? AND observaciones = ?", dia, fichaID).
