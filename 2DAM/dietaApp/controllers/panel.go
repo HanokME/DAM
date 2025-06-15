@@ -33,12 +33,20 @@ func MostrarPanel(c *gin.Context) {
 		return
 	}
 
+	// Buscar pacientes con filtro
+	search := c.Query("search")
+
 	// Obtener las fichas de pacientes asociadas a ese dietista.
 	var fichas []models.FichaPaciente
-	database.DB.
-		Joins("JOIN crea ON crea.id_ficha = ficha_pacientes.id").
-		Where("crea.id_dietista = ?", dietistaID).
-		Find(&fichas)
+	query := database.DB.Joins("JOIN crea ON crea.id_ficha = ficha_pacientes.id").
+		Where("crea.id_dietista = ?", dietistaID)
+
+	if search != "" {
+		like := "%" + search + "%"
+		query = query.Where("ficha_pacientes.nombre LIKE ? OR ficha_pacientes.dni LIKE ? OR ficha_pacientes.correo LIKE ?", like, like, like)
+	}
+
+	query.Find(&fichas)
 
 	// Obtener la inicial del nombre del dietista para mostrar en el panel.
 	inicial := strings.ToUpper(string(dietista.Nombre[0]))
@@ -47,5 +55,6 @@ func MostrarPanel(c *gin.Context) {
 	c.HTML(http.StatusOK, "panel.html", gin.H{
 		"fichas":  fichas,
 		"inicial": inicial,
+		"search":  search,
 	})
 }

@@ -142,7 +142,12 @@
 <main>
     <div class="titulo-panel">
         <h2>Fichas Clínicas</h2>
-        <button class="btn-anadir" onclick="location.href='/nueva_ficha'">Añadir</button>
+        <form method="GET" style="display: flex; align-items: center; gap: 12px;">
+            <input type="text" name="search" placeholder="Buscar por nombre, DNI o correo" value="{{.search}}" style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 6px; width: 260px;">
+            <button type="submit" class="btn-anadir">Buscar</button>
+            <button type="button" class="btn-anadir" onclick="window.location.href='/panel'">Limpiar</button>
+            <button type="button" class="btn-anadir" onclick="location.href='/nueva_ficha'">Añadir</button>
+        </form>
     </div>
 
     {{if .error}}
