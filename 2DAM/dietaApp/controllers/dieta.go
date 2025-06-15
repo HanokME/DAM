@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	"fmt" // Para los logs por consola
 	"net/http"
 	"strconv"
 	"strings"
@@ -16,26 +16,28 @@ import (
 func MostrarDieta(c *gin.Context) {
 	fichaIDStr := c.Param("fichaID")
 	fichaID, _ := strconv.Atoi(fichaIDStr)
-	dia := c.DefaultQuery("dia", "Lunes")
+	dia := c.DefaultQuery("dia", "Lunes") // Si no se pasa "dia" por defecto es Lunes
 
+	// Información nutricional
 	totalKcal := 0.0
 	totalProteinas := 0.0
 	totalGrasas := 0.0
 	totalHidratos := 0.0
 
 	var ficha models.FichaPaciente
-	database.DB.First(&ficha, fichaID)
+	database.DB.First(&ficha, fichaID) // obtener datos paciente desde la BBDD
 
 	var momentos []models.MomentoDia
 	database.DB.
 		Where("dia = ?", dia).
 		Order("FIELD(momento, 'Desayuno', 'Almuerzo', 'Comida', 'Merienda', 'Cena')").
-		Find(&momentos)
+		Find(&momentos) // Cargar los momentos del dia para ese dia
 
 	// Si no existen momentos para ese día, los creamos
 	defecto := []string{"Desayuno", "Almuerzo", "Comida", "Merienda", "Cena"}
-	momentos = []models.MomentoDia{}
+	momentos = []models.MomentoDia{} // cargar el slice vacio
 
+	// Si no existen momentos se crean por defecto
 	for _, m := range defecto {
 		var momento models.MomentoDia
 		result := database.DB.
@@ -58,7 +60,7 @@ func MostrarDieta(c *gin.Context) {
 	result := database.DB.
 		Where("nombre = ? AND observaciones = ?", dia, fichaIDStr).
 		First(&dieta)
-
+	// Si no existe se crea
 	if result.Error != nil {
 		if result.Error.Error() == "record not found" {
 			dieta = models.Dieta{
@@ -81,6 +83,7 @@ func MostrarDieta(c *gin.Context) {
 	// Debug
 	fmt.Println("Dieta ID:", dieta.ID, "Día:", dia, "Paciente:", fichaIDStr)
 
+	//Por cada momento se obtienen los alimentos
 	for _, momento := range momentos {
 		var incluye []models.Incluye
 		database.DB.
@@ -89,11 +92,12 @@ func MostrarDieta(c *gin.Context) {
 
 		fmt.Printf("Momento %s (%d): %d alimentos\n", momento.Momento, momento.ID, len(incluye))
 
+		//Itera sobre cada elemento del slice
 		for _, inc := range incluye {
-			var alimento models.Alimento
+			var alimento models.Alimento // Obtiene datos alimento
 			database.DB.First(&alimento, inc.IdAlimento)
-			alimentosPorMomento[momento.ID] = append(alimentosPorMomento[momento.ID], alimento)
-			cantidades[momento.ID] = append(cantidades[momento.ID], inc.Cantidad)
+			alimentosPorMomento[momento.ID] = append(alimentosPorMomento[momento.ID], alimento) //Agrega el alimento a un mapa
+			cantidades[momento.ID] = append(cantidades[momento.ID], inc.Cantidad)               //Agrega las cantidades al mapa (se agrupan por ID)
 
 			// Calorías y macronutrientes
 			totalKcal += (alimento.Kcal * inc.Cantidad) / 100.0
@@ -118,6 +122,7 @@ func MostrarDieta(c *gin.Context) {
 
 // GET: Muestra el formulario para añadir alimento
 func MostrarFormularioAgregarAlimento(c *gin.Context) {
+	// Se extraen parámetros de la URL.
 	fichaID := c.Param("fichaID")
 	dia := c.Param("dia")
 	momento := c.Param("momento")
@@ -195,13 +200,18 @@ func ProcesarAgregarAlimento(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/dieta/"+fichaIDStr+"?dia="+dia)
 }
 
+// GET: Muestra el formulario para editar un alimento
 func MostrarFormularioEditarAlimento(c *gin.Context) {
+	// Se extraen parámetros de la URL
 	fichaID := c.Param("fichaID")
 	dia := c.Param("dia")
 	momento := c.Param("momento")
 	alimentoID := c.Param("alimentoID")
 
+	//Se almacena el registro de incluye en una variable
 	var incluye models.Incluye
+
+	// Se consulta en la tabla el alimento específico
 	database.DB.
 		Where("id_alimento = ? AND id_momento = (SELECT id FROM momento_dia WHERE dia = ? AND momento = ? LIMIT 1)", alimentoID, dia, momento).
 		First(&incluye)
@@ -215,6 +225,7 @@ func MostrarFormularioEditarAlimento(c *gin.Context) {
 	})
 }
 
+// POST: Procesa el alimento seleccionado y lo actualiza
 func ProcesarEdicionAlimento(c *gin.Context) {
 	fichaID := c.Param("fichaID")
 	dia := c.Param("dia")
@@ -243,6 +254,7 @@ func ProcesarEdicionAlimento(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/dieta/"+fichaID+"?dia="+dia)
 }
 
+// POST: Elimina el alimento seleccionado
 func EliminarAlimento(c *gin.Context) {
 	fichaID := c.Param("fichaID")
 	dia := c.Param("dia")
@@ -267,19 +279,23 @@ func EliminarAlimento(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/dieta/"+fichaID+"?dia="+dia)
 }
 
+// Genera un PDF con la dieta del paciente
 func GenerarPDFDieta(c *gin.Context) {
 	fichaIDStr := c.Param("fichaID")
 	fichaID, _ := strconv.Atoi(fichaIDStr)
 
+	// Se busca datos del paciente en la BBDD
 	var ficha models.FichaPaciente
 	if err := database.DB.First(&ficha, fichaID).Error; err != nil {
 		c.String(http.StatusNotFound, "Paciente no encontrado")
 		return
 	}
 
+	// Array con los dias de la semana que se mostrarán en el pdf
 	diasSemana := []string{"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"}
 
-	pdf := gofpdf.New("P", "mm", "A4", "")
+	// Se crea el objeto PDF
+	pdf := gofpdf.New("P", "mm", "A4", "") // Orientacion y diseño del pdf
 	pdf.SetMargins(20, 20, 20)
 	pdf.AddUTF8Font("DejaVu", "", "fonts/DejaVuSans.ttf")
 	pdf.AddUTF8Font("DejaVu", "B", "fonts/DejaVuSans.ttf")
@@ -289,12 +305,14 @@ func GenerarPDFDieta(c *gin.Context) {
 	pdf.Cell(0, 10, "Dieta del Paciente")
 	pdf.Ln(10)
 
+	//Información del paciente
 	pdf.SetFont("DejaVu", "", 12)
 	pdf.Cell(0, 10, fmt.Sprintf("Paciente: %s", ficha.Nombre))
 	pdf.Ln(10)
 
+	// Se recorren los días
 	for _, dia := range diasSemana {
-		checkNewPage(pdf, 30)
+		checkNewPage(pdf, 30) // Esto verifica si hay espacio suficiente en la pagina para no cortar los dias
 
 		pdf.SetFont("DejaVu", "B", 14)
 		pdf.Cell(0, 10, fmt.Sprintf("Día: %s", dia))
@@ -320,6 +338,7 @@ func GenerarPDFDieta(c *gin.Context) {
 		totalGrasas := 0.0
 		totalHC := 0.0
 
+		// Recorre los momentos del dia
 		for _, momento := range momentos {
 			var incluye []models.Incluye
 			database.DB.
@@ -335,6 +354,7 @@ func GenerarPDFDieta(c *gin.Context) {
 			pdf.Cell(0, 8, momento.Momento)
 			pdf.Ln(6)
 
+			// recorre todos los alimentos incluidos para ese momento del día
 			for _, inc := range incluye {
 				var alimento models.Alimento
 				database.DB.First(&alimento, inc.IdAlimento)
@@ -358,6 +378,7 @@ func GenerarPDFDieta(c *gin.Context) {
 			pdf.Ln(2)
 		}
 
+		// Resumen nutricional
 		checkNewPage(pdf, 30)
 		pdf.SetFont("DejaVu", "B", 12)
 		pdf.Ln(4)
@@ -393,6 +414,7 @@ func checkNewPage(pdf *gofpdf.Fpdf, espacioNecesario float64) {
 	}
 }
 
+// obtenerIniciales toma el nombre completo y devuelve sus iniciales en mayúsculas
 func obtenerIniciales(nombre string) string {
 	iniciales := ""
 	palabras := strings.Fields(nombre)

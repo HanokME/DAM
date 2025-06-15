@@ -8,7 +8,7 @@ import (
 
 	"github.com/HanokME/DAM/2DAM/dietaApp/database"
 	"github.com/HanokME/DAM/2DAM/dietaApp/models"
-	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin" //FrameWork Web de Gestión de rutas y peticiones
 )
 
 // MostrarFormularioFicha renderiza el formulario HTML para crear una nueva ficha clínica.
@@ -113,7 +113,7 @@ func parseFloat(s string) float64 {
 
 // MostrarFormularioEdicion muestra el formulario con los datos del paciente cargados
 func MostrarFormularioEdicion(c *gin.Context) {
-	// Obtener el ID de la ficha desde la URL
+	// Obtener el ID de la ficha desde los parámetros del URL
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -121,12 +121,14 @@ func MostrarFormularioEdicion(c *gin.Context) {
 		return
 	}
 
+	//Busca la ficha en la BBDD
 	var ficha models.FichaPaciente
 	if err := database.DB.First(&ficha, id).Error; err != nil {
 		c.Redirect(http.StatusFound, "/panel")
 		return
 	}
 
+	// Muestra el formulario con los datos cargados
 	c.HTML(http.StatusOK, "editar_ficha.html", gin.H{
 		"ficha": ficha,
 	})
