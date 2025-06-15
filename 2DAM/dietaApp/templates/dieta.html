@@ -110,12 +110,11 @@
 <body>
 <div class="container">
     <div class="top-bar">
-        <h2>Paciente: Hanok Martin</h2>
+        <h2>Paciente: {{.paciente.Nombre}}</h2>
         <button onclick="window.location.href='/panel'">Volver</button>
     </div>
 
     <div class="dias">
-        
         <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
             <input type="hidden" name="dia" value="Lunes">
             <button type="submit" class="{{if eq $.dia "Lunes"}}active{{end}}">Lunes</button>
@@ -145,38 +144,43 @@
             <button type="submit" class="{{if eq $.dia "Domingo"}}active{{end}}">Domingo</button>
         </form>
     </div>
-    
 
     {{range .momentos}}
         <div class="momento">
             <h3>Momento: {{.Momento}}</h3>
 
             {{ $momentID := .ID }}
+            {{ $momentName := .Momento }}
             {{ $alimentos := index $.alimentosPorMomento $momentID }}
             {{ $cantidades := index $.cantidades $momentID }}
 
             {{if $alimentos}}
                 {{range $i, $a := $alimentos}}
                     <div class="alimento">
-                    <span>{{$a.Nombre}} - {{index $cantidades $i}} g/ml</span>
-                    <div class="acciones">
-                        <button>✏️</button>
-                        <button>🗑️</button>
-                    </div>
+                        <span>{{$a.Nombre}} - {{index $cantidades $i}} g/ml</span>
+                        <div class="acciones">
+                            <form method="GET" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{$momentName}}/{{$a.ID}}/edit" style="display:inline;">
+                                <button type="submit">✏️</button>
+                            </form>
+                            <form method="POST" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{$momentName}}/{{$a.ID}}/delete" style="display:inline;">
+                                <button type="submit" onclick="return confirm('¿Eliminar este alimento?')">🗑️</button>
+                            </form>
+                        </div>
                     </div>
                 {{end}}
             {{end}}
 
-            <form method="GET" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{.Momento}}/add">
+            <form method="GET" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{$momentName}}/add">
                 <button class="anadir" type="submit">+ Añadir alimento</button>
             </form>
         </div>
     {{end}}
 
-
     <button class="anadir">+ Añadir momento del día</button>
 
-    <button class="guardar">Guardar cambios</button>
+    <form method="GET" action="/panel">
+        <button class="guardar" type="submit">Guardar cambios</button>
+    </form>
 </div>
 </body>
 </html>

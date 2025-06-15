@@ -20,18 +20,26 @@ func MostrarDieta(c *gin.Context) {
 	database.DB.First(&ficha, fichaID)
 
 	var momentos []models.MomentoDia
-	database.DB.Where("dia = ?", dia).Find(&momentos)
+	database.DB.
+		Where("dia = ?", dia).
+		Order("FIELD(momento, 'Desayuno', 'Almuerzo', 'Comida', 'Merienda', 'Cena')").
+		Find(&momentos)
 
 	// Si no existen momentos para ese día, los creamos
-	if len(momentos) == 0 {
-		defecto := []string{"Desayuno", "Almuerzo", "Comida", "Merienda", "Cena"}
-		for _, m := range defecto {
-			nuevo := models.MomentoDia{
+	defecto := []string{"Desayuno", "Almuerzo", "Comida", "Merienda", "Cena"}
+	momentos = []models.MomentoDia{}
+
+	for _, m := range defecto {
+		var momento models.MomentoDia
+		result := database.DB.
+			Where("dia = ? AND momento = ?", dia, m).
+			FirstOrCreate(&momento, models.MomentoDia{
 				Dia:     dia,
 				Momento: m,
-			}
-			database.DB.Create(&nuevo)
-			momentos = append(momentos, nuevo)
+			})
+
+		if result.Error == nil {
+			momentos = append(momentos, momento)
 		}
 	}
 
@@ -168,4 +176,24 @@ func ProcesarAgregarAlimento(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusFound, "/dieta/"+fichaIDStr+"?dia="+dia)
+}
+
+func MostrarFormularioEditarAlimento(c *gin.Context) {
+	fichaID := c.Param("fichaID")
+	dia := c.Param("dia")
+	momento := c.Param("momento")
+	alimentoID := c.Param("alimentoID")
+
+	var incluye models.Incluye
+	database.DB.
+		Where("id_alimento = ? AND id_momento = (SELECT id FROM momento_dia WHERE dia = ? AND momento = ? LIMIT 1)", alimentoID, dia, momento).
+		First(&incluye)
+
+	c.HTML(http.StatusOK, "editar_alimentos.html", gin.H{
+		"fichaID":    fichaID,
+		"dia":        dia,
+		"momento":    momento,
+		"alimentoID": alimentoID,
+		"cantidad":   incluye.Cantidad,
+	})
 }

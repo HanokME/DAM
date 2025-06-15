@@ -62,6 +62,9 @@ func main() {
 	r.GET("/dieta/:fichaID/:dia/:momento/add", controllers.MostrarFormularioAgregarAlimento)
 	r.POST("/dieta/:fichaID/:dia/:momento/add", controllers.ProcesarAgregarAlimento)
 
+	// Editar alimento
+	r.GET("/dieta/:fichaID/:dia/:momento/:alimentoID/edit", controllers.MostrarFormularioEditarAlimento)
+
 	// Iniciar el servidor en el puerto 8080
 	r.Run(":8080")
 }
