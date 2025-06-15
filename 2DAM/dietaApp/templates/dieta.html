@@ -8,14 +8,53 @@
             font-family: Arial, sans-serif;
             background: #f9f9f9;
             margin: 0;
-            padding: 40px;
+        }
+
+        header {
+            background-color: #e0e0e0;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 48px;
+            object-fit: contain;
+        }
+
+        .menu-principal {
+            display: flex;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .btn-menu {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-menu:hover {
+            background-color: #005dc6;
         }
 
         .container {
             max-width: 1200px;
-            margin: auto;
+            margin: 40px auto;
             display: flex;
             gap: 30px;
+            padding: 0 30px;
         }
 
         .dieta-panel {
@@ -145,11 +184,20 @@
     </style>
 </head>
 <body>
+
+<header>
+    <div class="logo">
+        <img src="/static/logo.png" alt="Logo">
+    </div>
+    <div class="menu-principal">
+        <a href="/panel" class="btn-menu">Menú Principal</a>
+    </div>
+</header>
+
 <div class="container">
     <div class="dieta-panel">
         <div class="top-bar">
             <h2>Paciente: {{.paciente.Nombre}}</h2>
-            <button onclick="window.location.href='/panel'">Volver</button>
         </div>
 
         <div class="dias">
@@ -229,5 +277,6 @@
         </table>
     </div>
 </div>
+
 </body>
 </html>
