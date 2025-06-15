@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/HanokME/DAM/2DAM/dietaApp/database"
 	"github.com/HanokME/DAM/2DAM/dietaApp/models"
 	"github.com/gin-gonic/gin"
+	"github.com/jung-kurt/gofpdf"
 )
 
 func MostrarDieta(c *gin.Context) {
@@ -263,4 +265,142 @@ func EliminarAlimento(c *gin.Context) {
 		Delete(&models.Incluye{})
 
 	c.Redirect(http.StatusFound, "/dieta/"+fichaID+"?dia="+dia)
+}
+
+func GenerarPDFDieta(c *gin.Context) {
+	fichaIDStr := c.Param("fichaID")
+	fichaID, _ := strconv.Atoi(fichaIDStr)
+
+	var ficha models.FichaPaciente
+	if err := database.DB.First(&ficha, fichaID).Error; err != nil {
+		c.String(http.StatusNotFound, "Paciente no encontrado")
+		return
+	}
+
+	diasSemana := []string{"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"}
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(20, 20, 20)
+	pdf.AddUTF8Font("DejaVu", "", "fonts/DejaVuSans.ttf")
+	pdf.AddUTF8Font("DejaVu", "B", "fonts/DejaVuSans.ttf")
+	pdf.SetFont("DejaVu", "B", 16)
+	pdf.AddPage()
+
+	pdf.Cell(0, 10, "Dieta del Paciente")
+	pdf.Ln(10)
+
+	pdf.SetFont("DejaVu", "", 12)
+	pdf.Cell(0, 10, fmt.Sprintf("Paciente: %s", ficha.Nombre))
+	pdf.Ln(10)
+
+	for _, dia := range diasSemana {
+		checkNewPage(pdf, 30)
+
+		pdf.SetFont("DejaVu", "B", 14)
+		pdf.Cell(0, 10, fmt.Sprintf("Día: %s", dia))
+		pdf.Ln(8)
+
+		var dieta models.Dieta
+		database.DB.
+			Where("nombre = ? AND observaciones = ?", dia, fichaIDStr).
+			First(&dieta)
+
+		if dieta.ID == 0 {
+			pdf.SetFont("DejaVu", "", 11)
+			pdf.Cell(0, 8, "No hay datos para este día.")
+			pdf.Ln(10)
+			continue
+		}
+
+		momentos := []models.MomentoDia{}
+		database.DB.Where("dia = ?", dia).Find(&momentos)
+
+		totalKcal := 0.0
+		totalProt := 0.0
+		totalGrasas := 0.0
+		totalHC := 0.0
+
+		for _, momento := range momentos {
+			var incluye []models.Incluye
+			database.DB.
+				Where("id_dieta = ? AND id_momento = ?", dieta.ID, momento.ID).
+				Find(&incluye)
+
+			if len(incluye) == 0 {
+				continue
+			}
+
+			checkNewPage(pdf, 20)
+			pdf.SetFont("DejaVu", "B", 12)
+			pdf.Cell(0, 8, momento.Momento)
+			pdf.Ln(6)
+
+			for _, inc := range incluye {
+				var alimento models.Alimento
+				database.DB.First(&alimento, inc.IdAlimento)
+
+				kcal := (alimento.Kcal * inc.Cantidad) / 100.0
+				prot := (alimento.Proteina * inc.Cantidad) / 100.0
+				grasas := (alimento.Grasas * inc.Cantidad) / 100.0
+				hc := (alimento.Hidratos * inc.Cantidad) / 100.0
+
+				totalKcal += kcal
+				totalProt += prot
+				totalGrasas += grasas
+				totalHC += hc
+
+				checkNewPage(pdf, 10)
+				pdf.SetFont("DejaVu", "", 11)
+				pdf.Cell(0, 6, fmt.Sprintf("- %s: %.1f g/ml", alimento.Nombre, inc.Cantidad))
+				pdf.Ln(5)
+			}
+
+			pdf.Ln(2)
+		}
+
+		checkNewPage(pdf, 30)
+		pdf.SetFont("DejaVu", "B", 12)
+		pdf.Ln(4)
+		pdf.Cell(0, 8, "Resumen Nutricional")
+		pdf.Ln(6)
+		pdf.SetFont("DejaVu", "", 11)
+		pdf.Cell(0, 6, fmt.Sprintf("Calorías: %.0f kcal", totalKcal))
+		pdf.Ln(5)
+		pdf.Cell(0, 6, fmt.Sprintf("Proteínas: %.1f g", totalProt))
+		pdf.Ln(5)
+		pdf.Cell(0, 6, fmt.Sprintf("Grasas: %.1f g", totalGrasas))
+		pdf.Ln(5)
+		pdf.Cell(0, 6, fmt.Sprintf("Hidratos: %.1f g", totalHC))
+		pdf.Ln(10)
+	}
+
+	iniciales := obtenerIniciales(ficha.Nombre)
+	filename := fmt.Sprintf("dieta%s.pdf", iniciales)
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Content-Type", "application/pdf")
+
+	if err := pdf.Output(c.Writer); err != nil {
+		fmt.Println("ERROR AL GENERAR PDF:", err)
+		c.String(http.StatusInternalServerError, "No se pudo generar el PDF")
+	}
+}
+
+// checkNewPage verifica si queda suficiente espacio antes de añadir contenido.
+// Si no, crea una nueva página.
+func checkNewPage(pdf *gofpdf.Fpdf, espacioNecesario float64) {
+	if pdf.GetY()+espacioNecesario > 280 {
+		pdf.AddPage()
+	}
+}
+
+func obtenerIniciales(nombre string) string {
+	iniciales := ""
+	palabras := strings.Fields(nombre)
+
+	for _, palabra := range palabras {
+		if len(palabra) > 0 {
+			iniciales += strings.ToUpper(string(palabra[0]))
+		}
+	}
+	return iniciales
 }

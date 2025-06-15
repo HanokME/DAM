@@ -268,6 +268,12 @@
         <form method="GET" action="/panel">
             <button class="guardar" type="submit">Guardar cambios</button>
         </form>
+
+        <form method="GET" action="/dieta/{{.paciente.ID}}/pdf" style="margin-top: 20px;">
+            <input type="hidden" name="dia" value="{{.dia}}">
+            <button type="submit" class="guardar" style="background-color: #4CAF50;">Descargar PDF</button>
+        </form>
+        
     </div>
 
     <div class="resumen-panel">

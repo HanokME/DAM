@@ -73,6 +73,9 @@ func main() {
 	// Eliminar alimento
 	r.POST("/dieta/:fichaID/:dia/:momento/:alimentoID/delete", controllers.EliminarAlimento)
 
+	// Generar PDF de la dieta
+	r.GET("/dieta/:fichaID/pdf", controllers.GenerarPDFDieta)
+
 	// Iniciar el servidor en el puerto 8080
 	r.Run(":8080")
 }
