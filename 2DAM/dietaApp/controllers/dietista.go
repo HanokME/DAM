@@ -2,9 +2,12 @@ package controllers
 
 import (
 	"errors"
+	"net/http"
+	"strconv"
 
 	"github.com/HanokME/DAM/2DAM/dietaApp/database"
 	"github.com/HanokME/DAM/2DAM/dietaApp/models"
+	"github.com/gin-gonic/gin"
 )
 
 // Guarda un nuevo dietista en la base de datos
@@ -37,4 +40,48 @@ func BuscarDietistaPorDNI(dni string) (*models.Dietista, error) {
 		return nil, result.Error
 	}
 	return &dietista, nil
+}
+
+// MostrarEditarDietista renderiza el formulario con los datos actuales del dietista
+func MostrarEditarDietista(c *gin.Context) {
+	idStr, err := c.Cookie("dietista_id")
+	if err != nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+	dietistaID, _ := strconv.Atoi(idStr)
+
+	var dietista models.Dietista
+	if err := database.DB.First(&dietista, dietistaID).Error; err != nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	c.HTML(http.StatusOK, "editar_dietista.html", gin.H{
+		"dietista": dietista,
+	})
+}
+
+// ActualizarDietista guarda los cambios del perfil
+func ActualizarDietista(c *gin.Context) {
+
+	idStr, err := c.Cookie("dietista_id")
+	if err != nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+	dietistaID, _ := strconv.Atoi(idStr)
+
+	var dietista models.Dietista
+	if err := database.DB.First(&dietista, dietistaID).Error; err != nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	dietista.DNI = c.PostForm("dni")
+	dietista.Nombre = c.PostForm("nombre")
+	dietista.Contraseña = c.PostForm("contraseña")
+
+	database.DB.Save(&dietista)
+	c.Redirect(http.StatusFound, "/panel")
 }

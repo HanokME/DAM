@@ -39,6 +39,7 @@
             align-items: center;
             margin-right: 10px;
             font-weight: bold;
+            text-decoration: none;
         }
     
         .btn-cerrar {
@@ -155,7 +156,7 @@
         <img src="/static/logo.png" alt="Logo" style="height: 48px; object-fit: contain; margin-right: 8px;">
     </div>
     <div class="perfil">
-        <div class="inicial">{{.inicial}}</div>
+        <a href="/editar_dietista" class="inicial">{{.inicial}}</a>
         <a href="/logout" class="btn-cerrar">Cerrar Sesión</a>
     </div>
 </header>

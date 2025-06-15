@@ -41,6 +41,10 @@ func main() {
 	r.GET("/registro", controllers.MostrarRegistro)
 	r.POST("/registro", controllers.RegistrarDietista)
 
+	// Editar dietista
+	r.GET("/editar_dietista", controllers.MostrarEditarDietista)
+	r.POST("/editar_dietista", controllers.ActualizarDietista)
+
 	// Login y logout
 	r.GET("/login", controllers.MostrarLogin)
 	r.POST("/login", controllers.IniciarSesion)

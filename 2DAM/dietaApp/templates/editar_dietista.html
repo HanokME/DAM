@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Perfil</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 18px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .acciones {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .acciones button,
+        .acciones a {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .guardar {
+            background-color: #5BC0EB;
+            color: white;
+        }
+
+        .cancelar {
+            background-color: #F18F01;
+            color: white;
+        }
+
+        .acciones button:hover,
+        .acciones a:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Editar Perfil del Dietista</h2>
+
+    <form method="POST" action="/editar_dietista">
+        <label>DNI:</label>
+        <input type="text" name="dni" value="{{.dietista.DNI}}" readonly style="background-color: #eee; cursor: not-allowed;">
+
+        <label>Nombre:</label>
+        <input type="text" name="nombre" value="{{.dietista.Nombre}}" required>
+
+        <label>Contraseña:</label>
+        <input type="text" name="contraseña" value="{{.dietista.Contraseña}}">
+
+        <div class="acciones">
+            <button type="submit" class="guardar">Guardar</button>
+            <a href="/panel" class="cancelar">Cancelar</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
