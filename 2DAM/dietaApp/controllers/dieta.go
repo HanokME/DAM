@@ -197,3 +197,48 @@ func MostrarFormularioEditarAlimento(c *gin.Context) {
 		"cantidad":   incluye.Cantidad,
 	})
 }
+
+func ProcesarEdicionAlimento(c *gin.Context) {
+	fichaID := c.Param("fichaID")
+	dia := c.Param("dia")
+	momento := c.Param("momento")
+	alimentoID := c.Param("alimentoID")
+
+	nuevaCantidad, _ := strconv.ParseFloat(c.PostForm("cantidad"), 64)
+
+	// Obtener ID del momento
+	var momentoDia models.MomentoDia
+	database.DB.Where("dia = ? AND momento = ?", dia, momento).First(&momentoDia)
+
+	// Obtener dieta directamente
+	var dieta models.Dieta
+	database.DB.
+		Where("nombre = ? AND observaciones = ?", dia, fichaID).
+		First(&dieta)
+
+	// Usar IDs directamente en el update
+	database.DB.Model(&models.Incluye{}).
+		Where("id_dieta = ?", dieta.ID).
+		Where("id_momento = ?", momentoDia.ID).
+		Where("id_alimento = ?", alimentoID).
+		Update("cantidad", nuevaCantidad)
+
+	c.Redirect(http.StatusFound, "/dieta/"+fichaID+"?dia="+dia)
+}
+
+func EliminarAlimento(c *gin.Context) {
+	fichaID := c.Param("fichaID")
+	dia := c.Param("dia")
+	momento := c.Param("momento")
+	alimentoID := c.Param("alimentoID")
+
+	var momentoDia models.MomentoDia
+	database.DB.Where("dia = ? AND momento = ?", dia, momento).First(&momentoDia)
+
+	database.DB.Where("id_dieta = (SELECT id FROM dieta WHERE nombre = ? AND observaciones = ?)", dia, fichaID).
+		Where("id_momento = ?", momentoDia.ID).
+		Where("id_alimento = ?", alimentoID).
+		Delete(&models.Incluye{})
+
+	c.Redirect(http.StatusFound, "/dieta/"+fichaID+"?dia="+dia)
+}

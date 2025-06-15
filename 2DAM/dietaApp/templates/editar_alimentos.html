@@ -3,14 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <title>Editar Alimento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .acciones {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .acciones button, .acciones a {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .guardar {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .eliminar {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .cancelar {
+            background-color: #6c757d;
+            color: white;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .acciones button:hover {
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body>
+<div class="container">
     <h2>Editar cantidad del alimento</h2>
+
     <form method="POST" action="/dieta/{{.fichaID}}/{{.dia}}/{{.momento}}/{{.alimentoID}}/edit">
-        <label>Cantidad (g/ml):</label><br>
-        <input type="number" name="cantidad" value="{{.cantidad}}" step="0.1" required><br><br>
-        <button type="submit">Guardar</button>
-        <a href="/dieta/{{.fichaID}}?dia={{.dia}}">Cancelar</a>
+        <label>Cantidad (g/ml):</label>
+        <input type="number" name="cantidad" value="{{.cantidad}}" step="0.1" required>
+
+        <div class="acciones">
+            <button type="submit" class="guardar">Guardar</button>
+            <form method="POST" action="/dieta/{{.fichaID}}/{{.dia}}/{{.momento}}/{{.alimentoID}}/delete" style="margin:0;">
+                <button type="submit" class="eliminar" onclick="return confirm('¿Eliminar este alimento?')">Eliminar</button>
+            </form>
+            <a href="/dieta/{{.fichaID}}?dia={{.dia}}" class="cancelar">Cancelar</a>
+        </div>
     </form>
+</div>
 </body>
 </html>
