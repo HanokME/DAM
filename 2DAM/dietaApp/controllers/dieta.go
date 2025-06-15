@@ -16,6 +16,11 @@ func MostrarDieta(c *gin.Context) {
 	fichaID, _ := strconv.Atoi(fichaIDStr)
 	dia := c.DefaultQuery("dia", "Lunes")
 
+	totalKcal := 0.0
+	totalProteinas := 0.0
+	totalGrasas := 0.0
+	totalHidratos := 0.0
+
 	var ficha models.FichaPaciente
 	database.DB.First(&ficha, fichaID)
 
@@ -87,6 +92,12 @@ func MostrarDieta(c *gin.Context) {
 			database.DB.First(&alimento, inc.IdAlimento)
 			alimentosPorMomento[momento.ID] = append(alimentosPorMomento[momento.ID], alimento)
 			cantidades[momento.ID] = append(cantidades[momento.ID], inc.Cantidad)
+
+			// Calorías y macronutrientes
+			totalKcal += (alimento.Kcal * inc.Cantidad) / 100.0
+			totalProteinas += (alimento.Proteina * inc.Cantidad) / 100.0
+			totalGrasas += (alimento.Grasas * inc.Cantidad) / 100.0
+			totalHidratos += (alimento.Hidratos * inc.Cantidad) / 100.0
 		}
 	}
 
@@ -96,6 +107,10 @@ func MostrarDieta(c *gin.Context) {
 		"momentos":            momentos,
 		"alimentosPorMomento": alimentosPorMomento,
 		"cantidades":          cantidades,
+		"totalKcal":           totalKcal,
+		"totalProteinas":      totalProteinas,
+		"totalGrasas":         totalGrasas,
+		"totalHidratos":       totalHidratos,
 	})
 }
 

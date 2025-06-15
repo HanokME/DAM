@@ -12,12 +12,27 @@
         }
 
         .container {
-            background: white;
-            max-width: 800px;
+            max-width: 1200px;
             margin: auto;
+            display: flex;
+            gap: 30px;
+        }
+
+        .dieta-panel {
+            flex: 3;
+            background: white;
             border-radius: 12px;
             padding: 30px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .resumen-panel {
+            flex: 1.5;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            height: fit-content;
         }
 
         h2 {
@@ -34,6 +49,7 @@
             display: flex;
             gap: 12px;
             margin: 20px 0;
+            flex-wrap: wrap;
         }
 
         .dias button {
@@ -85,7 +101,7 @@
             background: #eee;
         }
 
-        .anadir, .guardar {
+        .anadir {
             background: none;
             border: none;
             color: #007bff;
@@ -104,83 +120,114 @@
             width: 100%;
             margin-top: 30px;
             font-size: 16px;
+            cursor: pointer;
+        }
+
+        .resumen-panel h3 {
+            margin-top: 0;
+        }
+
+        .resumen-panel table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .resumen-panel th, .resumen-panel td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .resumen-panel th {
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="top-bar">
-        <h2>Paciente: {{.paciente.Nombre}}</h2>
-        <button onclick="window.location.href='/panel'">Volver</button>
-    </div>
+    <div class="dieta-panel">
+        <div class="top-bar">
+            <h2>Paciente: {{.paciente.Nombre}}</h2>
+            <button onclick="window.location.href='/panel'">Volver</button>
+        </div>
 
-    <div class="dias">
-        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
-            <input type="hidden" name="dia" value="Lunes">
-            <button type="submit" class="{{if eq $.dia "Lunes"}}active{{end}}">Lunes</button>
-        </form>
-        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
-            <input type="hidden" name="dia" value="Martes">
-            <button type="submit" class="{{if eq $.dia "Martes"}}active{{end}}">Martes</button>
-        </form>
-        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
-            <input type="hidden" name="dia" value="Miércoles">
-            <button type="submit" class="{{if eq $.dia "Miércoles"}}active{{end}}">Miércoles</button>
-        </form>
-        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
-            <input type="hidden" name="dia" value="Jueves">
-            <button type="submit" class="{{if eq $.dia "Jueves"}}active{{end}}">Jueves</button>
-        </form>
-        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
-            <input type="hidden" name="dia" value="Viernes">
-            <button type="submit" class="{{if eq $.dia "Viernes"}}active{{end}}">Viernes</button>
-        </form>
-        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
-            <input type="hidden" name="dia" value="Sábado">
-            <button type="submit" class="{{if eq $.dia "Sábado"}}active{{end}}">Sábado</button>
-        </form>
-        <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
-            <input type="hidden" name="dia" value="Domingo">
-            <button type="submit" class="{{if eq $.dia "Domingo"}}active{{end}}">Domingo</button>
-        </form>
-    </div>
-
-    {{range .momentos}}
-        <div class="momento">
-            <h3>Momento: {{.Momento}}</h3>
-
-            {{ $momentID := .ID }}
-            {{ $momentName := .Momento }}
-            {{ $alimentos := index $.alimentosPorMomento $momentID }}
-            {{ $cantidades := index $.cantidades $momentID }}
-
-            {{if $alimentos}}
-                {{range $i, $a := $alimentos}}
-                    <div class="alimento">
-                        <span>{{$a.Nombre}} - {{index $cantidades $i}} g/ml</span>
-                        <div class="acciones">
-                            <form method="GET" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{$momentName}}/{{$a.ID}}/edit" style="display:inline;">
-                                <button type="submit">✏️</button>
-                            </form>
-                            <form method="POST" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{$momentName}}/{{$a.ID}}/delete" style="display:inline;">
-                                <button type="submit" onclick="return confirm('¿Eliminar este alimento?')">🗑️</button>
-                            </form>
-                        </div>
-                    </div>
-                {{end}}
-            {{end}}
-
-            <form method="GET" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{$momentName}}/add">
-                <button class="anadir" type="submit">+ Añadir alimento</button>
+        <div class="dias">
+            <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+                <input type="hidden" name="dia" value="Lunes">
+                <button type="submit" class="{{if eq $.dia "Lunes"}}active{{end}}">Lunes</button>
+            </form>
+            <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+                <input type="hidden" name="dia" value="Martes">
+                <button type="submit" class="{{if eq $.dia "Martes"}}active{{end}}">Martes</button>
+            </form>
+            <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+                <input type="hidden" name="dia" value="Miércoles">
+                <button type="submit" class="{{if eq $.dia "Miércoles"}}active{{end}}">Miércoles</button>
+            </form>
+            <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+                <input type="hidden" name="dia" value="Jueves">
+                <button type="submit" class="{{if eq $.dia "Jueves"}}active{{end}}">Jueves</button>
+            </form>
+            <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+                <input type="hidden" name="dia" value="Viernes">
+                <button type="submit" class="{{if eq $.dia "Viernes"}}active{{end}}">Viernes</button>
+            </form>
+            <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+                <input type="hidden" name="dia" value="Sábado">
+                <button type="submit" class="{{if eq $.dia "Sábado"}}active{{end}}">Sábado</button>
+            </form>
+            <form style="display:inline;" method="GET" action="/dieta/{{$.paciente.ID}}">
+                <input type="hidden" name="dia" value="Domingo">
+                <button type="submit" class="{{if eq $.dia "Domingo"}}active{{end}}">Domingo</button>
             </form>
         </div>
-    {{end}}
 
-    <button class="anadir">+ Añadir momento del día</button>
+        {{range .momentos}}
+            <div class="momento">
+                <h3>Momento: {{.Momento}}</h3>
+                {{ $momentID := .ID }}
+                {{ $momentName := .Momento }}
+                {{ $alimentos := index $.alimentosPorMomento $momentID }}
+                {{ $cantidades := index $.cantidades $momentID }}
 
-    <form method="GET" action="/panel">
-        <button class="guardar" type="submit">Guardar cambios</button>
-    </form>
+                {{if $alimentos}}
+                    {{range $i, $a := $alimentos}}
+                        <div class="alimento">
+                            <span>{{$a.Nombre}} - {{index $cantidades $i}} g/ml</span>
+                            <div class="acciones">
+                                <form method="GET" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{$momentName}}/{{$a.ID}}/edit" style="display:inline;">
+                                    <button type="submit">✏️</button>
+                                </form>
+                                <form method="POST" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{$momentName}}/{{$a.ID}}/delete" style="display:inline;">
+                                    <button type="submit" onclick="return confirm('¿Eliminar este alimento?')">🗑️</button>
+                                </form>
+                            </div>
+                        </div>
+                    {{end}}
+                {{end}}
+
+                <form method="GET" action="/dieta/{{$.paciente.ID}}/{{$.dia}}/{{$momentName}}/add">
+                    <button class="anadir" type="submit">+ Añadir alimento</button>
+                </form>
+            </div>
+        {{end}}
+
+        <form method="GET" action="/panel">
+            <button class="guardar" type="submit">Guardar cambios</button>
+        </form>
+    </div>
+
+    <div class="resumen-panel">
+        <h3>Resumen nutricional del día</h3>
+        <table>
+            <tr><th>Concepto</th><th>Total</th></tr>
+            <tr><td>Calorías</td><td>{{printf "%.0f" .totalKcal}} kcal</td></tr>
+            <tr><td>Proteínas</td><td>{{printf "%.1f" .totalProteinas}} g</td></tr>
+            <tr><td>Grasas</td><td>{{printf "%.1f" .totalGrasas}} g</td></tr>
+            <tr><td>Hidratos</td><td>{{printf "%.1f" .totalHidratos}} g</td></tr>
+        </table>
+    </div>
 </div>
 </body>
 </html>
