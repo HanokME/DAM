@@ -86,9 +86,6 @@
 
         <div class="acciones">
             <button type="submit" class="guardar">Guardar</button>
-            <form method="POST" action="/dieta/{{.fichaID}}/{{.dia}}/{{.momento}}/{{.alimentoID}}/delete" style="margin:0;">
-                <button type="submit" class="eliminar" onclick="return confirm('¿Eliminar este alimento?')">Eliminar</button>
-            </form>
             <a href="/dieta/{{.fichaID}}?dia={{.dia}}" class="cancelar">Cancelar</a>
         </div>
     </form>

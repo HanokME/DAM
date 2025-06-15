@@ -235,7 +235,14 @@ func EliminarAlimento(c *gin.Context) {
 	var momentoDia models.MomentoDia
 	database.DB.Where("dia = ? AND momento = ?", dia, momento).First(&momentoDia)
 
-	database.DB.Where("id_dieta = (SELECT id FROM dieta WHERE nombre = ? AND observaciones = ?)", dia, fichaID).
+	database.DB.
+		Where("id_dieta = (?)",
+			database.DB.
+				Table("dieta").
+				Select("id").
+				Where("nombre = ? AND observaciones = ?", dia, fichaID).
+				Limit(1),
+		).
 		Where("id_momento = ?", momentoDia.ID).
 		Where("id_alimento = ?", alimentoID).
 		Delete(&models.Incluye{})
