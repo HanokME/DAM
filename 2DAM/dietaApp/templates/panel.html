@@ -9,7 +9,7 @@
             margin: 0;
             background-color: #f4f4f4;
         }
-
+    
         header {
             background-color: #e0e0e0;
             padding: 15px 30px;
@@ -17,19 +17,19 @@
             justify-content: space-between;
             align-items: center;
         }
-
+    
         .logo {
             font-size: 24px;
             font-weight: bold;
         }
-
+    
         .perfil {
             display: flex;
             align-items: center;
         }
-
+    
         .inicial {
-            background-color: #444;
+            background-color: #555;
             color: white;
             border-radius: 50%;
             width: 35px;
@@ -40,45 +40,58 @@
             margin-right: 10px;
             font-weight: bold;
         }
-
+    
         .btn-cerrar {
-            background-color: #333;
+            background-color: #F18F01;
             color: white;
             padding: 8px 12px;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
         }
-
+    
+        .btn-cerrar:hover {
+            background-color: #d37800;
+        }
+    
         main {
             padding: 30px;
         }
-
+    
         .titulo-panel {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
-
+    
         h2 {
             margin: 0;
+            color: #333;
         }
-
+    
         .btn-anadir {
-            background-color: #444;
+            background-color: #5BC0EB;
             color: white;
             padding: 8px 14px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: bold;
         }
-
+    
+        .btn-anadir:hover {
+            background-color: #3faed5;
+        }
+    
         .grid {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
         }
-
+    
         .card {
             width: 180px;
             background: white;
@@ -88,7 +101,7 @@
             text-align: center;
             padding-bottom: 10px;
         }
-
+    
         .card img.user {
             width: 80px;
             height: 80px;
@@ -96,35 +109,44 @@
             margin-top: 16px;
             border-radius: 50%;
         }
-
+    
         .card .nombre {
             padding: 10px;
             font-weight: bold;
+            color: #333;
         }
-
+    
         .acciones {
             display: flex;
             justify-content: center;
             gap: 10px;
             padding-bottom: 12px;
         }
-
+    
         .acciones a img.icono {
             width: 24px;
             height: 24px;
             cursor: pointer;
             transition: transform 0.2s ease;
         }
-
+    
         .acciones a img.icono:hover {
             transform: scale(1.15);
         }
-
+    
         .error {
             color: red;
             margin-bottom: 10px;
         }
+    
+        input[type="text"] {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: 260px;
+        }
     </style>
+    
 </head>
 <body>
 
@@ -158,7 +180,7 @@
         {{range .fichas}}
         <div class="card">
             <img
-                src="https://ui-avatars.com/api/?name={{.Nombre | urlquery}}&background=4CAF50&color=fff&bold=true"
+                src="https://ui-avatars.com/api/?name={{.Nombre | urlquery}}&background=5BC0EB&color=fff&bold=true"
                 alt="Paciente"
                 class="user"
             >

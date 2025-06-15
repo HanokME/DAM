@@ -22,19 +22,22 @@
 
         h2 {
             margin-top: 0;
+            color: #333;
         }
 
         label {
             font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
         }
 
         input[type="number"] {
             width: 100%;
-            padding: 8px;
-            margin-top: 4px;
-            margin-bottom: 16px;
+            padding: 10px;
+            margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 6px;
+            font-size: 15px;
         }
 
         .acciones {
@@ -43,35 +46,34 @@
             gap: 10px;
         }
 
-        .acciones button, .acciones a {
+        .acciones button {
             flex: 1;
             padding: 10px;
             border-radius: 6px;
             border: none;
             font-weight: bold;
-            text-align: center;
-            text-decoration: none;
+            color: white;
             cursor: pointer;
         }
 
         .guardar {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .eliminar {
-            background-color: #dc3545;
-            color: white;
+            background-color: #5BC0EB;
+            font-size: 15px;
         }
 
         .cancelar {
-            background-color: #6c757d;
-            color: white;
+            background-color: #F18F01;
+            text-decoration: none;
             text-align: center;
             display: inline-block;
+            color: black;
+            padding: 10px;
+            font-size: 15px;
+            flex: 1;
         }
 
-        .acciones button:hover {
+        .acciones button:hover,
+        .cancelar:hover {
             opacity: 0.9;
         }
     </style>

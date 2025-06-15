@@ -22,43 +22,62 @@
 
         h2 {
             margin-top: 0;
+            color: #333;
         }
 
         label {
             font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
         }
 
         select, input[type="number"] {
             width: 100%;
-            padding: 8px;
-            margin-top: 4px;
-            margin-bottom: 16px;
+            padding: 10px;
+            margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 6px;
+            font-size: 15px;
         }
 
         .acciones {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-        }
-
-        .acciones button, .acciones a {
-            padding: 10px 16px;
-            border-radius: 6px;
-            border: none;
-            text-decoration: none;
-            font-weight: bold;
+            gap: 10px;
         }
 
         .acciones button {
-            background-color: #007bff;
+            background-color: #5BC0EB;
             color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
             cursor: pointer;
+            font-size: 15px;
+            flex: 1;
         }
 
         .acciones a {
-            color: #007bff;
+            background-color: #F18F01;
+            color: white;
+            text-align: center;
+            font-size: 15px;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            flex: 1;
+        }
+
+        .acciones button:hover,
+        .acciones a:hover {
+            opacity: 0.9;
+        }
+
+        optgroup {
+            font-style: italic;
+            font-weight: bold;
         }
     </style>
 </head>
