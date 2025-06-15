@@ -43,7 +43,7 @@ func MostrarPanel(c *gin.Context) {
 
 	if search != "" {
 		like := "%" + search + "%"
-		query = query.Where("ficha_pacientes.nombre LIKE ? OR ficha_pacientes.dni LIKE ? OR ficha_pacientes.correo LIKE ?", like, like, like)
+		query = query.Where("ficha_pacientes.nombre LIKE ? OR ficha_pacientes.dni LIKE ? OR ficha_pacientes.email LIKE ?", like, like, like)
 	}
 
 	query.Find(&fichas)
