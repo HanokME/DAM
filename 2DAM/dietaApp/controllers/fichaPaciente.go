@@ -48,6 +48,11 @@ func RegistrarFichaPaciente(c *gin.Context) {
 		return
 	}
 
+	// Para el calculo del IMC
+	altura := parseInt(c.PostForm("altura"))
+	peso := parseFloat(c.PostForm("peso"))
+	imc := CalcularIMC(altura, peso)
+
 	// Crear una instancia de FichaPaciente con los datos del formulario
 	ficha := models.FichaPaciente{
 		DNI:             strings.TrimSpace(c.PostForm("dni")),
@@ -55,9 +60,9 @@ func RegistrarFichaPaciente(c *gin.Context) {
 		Email:           strings.TrimSpace(c.PostForm("email")),
 		Telefono:        strings.TrimSpace(c.PostForm("telefono")),
 		FechaNacimiento: fechaNacimiento,
-		AlturaCM:        parseInt(c.PostForm("altura")),
-		PesoKG:          parseFloat(c.PostForm("peso")),
-		IMC:             parseFloat(c.PostForm("imc")),
+		AlturaCM:        altura,
+		PesoKG:          peso,
+		IMC:             imc,
 		Actividad:       strings.TrimSpace(c.PostForm("actividad")),
 		Objetivo:        strings.TrimSpace(c.PostForm("objetivo")),
 		Patologia:       strings.TrimSpace(c.PostForm("patologia")),
@@ -157,7 +162,7 @@ func ActualizarFichaPaciente(c *gin.Context) {
 	ficha.FechaNacimiento, _ = time.Parse("2006-01-02", c.PostForm("fecha_nacimiento"))
 	ficha.AlturaCM = parseInt(c.PostForm("altura"))
 	ficha.PesoKG = parseFloat(c.PostForm("peso"))
-	ficha.IMC = parseFloat(c.PostForm("imc"))
+	ficha.IMC = CalcularIMC(ficha.AlturaCM, ficha.PesoKG)
 	ficha.Actividad = c.PostForm("actividad")
 	ficha.Objetivo = c.PostForm("objetivo")
 	ficha.Patologia = c.PostForm("patologia")
@@ -165,4 +170,16 @@ func ActualizarFichaPaciente(c *gin.Context) {
 	database.DB.Save(&ficha)
 
 	c.Redirect(http.StatusFound, "/panel")
+}
+
+func CalcularIMC(alturaCM int, pesoKG float64) float64 {
+
+	if alturaCM == 0 {
+		return 0
+	}
+
+	alturaM := float64(alturaCM) / 100
+	imc := pesoKG / (alturaM * alturaM)
+
+	return imc
 }

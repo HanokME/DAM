@@ -87,7 +87,7 @@
         <input type="number" step="0.1" name="peso" value="{{.ficha.PesoKG}}" required>
 
         <label>IMC:</label>
-        <input type="number" step="0.1" name="imc" value="{{.ficha.IMC}}">
+        <input type="number" step="0.1" name="imc" value="{{.ficha.IMC}}" readonly>
 
         <label>Actividad Física:</label>
         <input type="text" name="actividad" value="{{.ficha.Actividad}}">
@@ -101,5 +101,22 @@
         <button type="submit">Guardar Cambios</button>
     </form>
 </div>
+<script>
+    function calcularIMC() {
+        const altura = parseFloat(document.querySelector('input[name="altura"]').value);
+        const peso = parseFloat(document.querySelector('input[name="peso"]').value);
+        const imcField = document.querySelector('input[name="imc"]');
+
+        if (!isNaN(altura) && !isNaN(peso) && altura > 0) {
+            const imc = peso / Math.pow(altura / 100, 2);
+            imcField.value = imc.toFixed(1);
+        } else {
+            imcField.value = '';
+        }
+    }
+
+    document.querySelector('input[name="altura"]').addEventListener('input', calcularIMC);
+    document.querySelector('input[name="peso"]').addEventListener('input', calcularIMC);
+</script>
 </body>
 </html>
